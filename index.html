@@ -1,0 +1,620 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contractor Weekly Scorecard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <style>
+      *, *::before, *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --bg-page: #f5f4f0;
+        --bg-card: #ffffff;
+        --text-primary: #18181b;
+        --text-secondary: #71717a;
+        --text-muted: #a1a1aa;
+        --border: #e4e4e7;
+        --accent: #1e3a2f;
+        --accent-light: #2d5a47;
+        --warning-bg: #fef9c3;
+        --warning-text: #854d0e;
+        --warning-border: #fde047;
+        --success-bg: #dcfce7;
+        --success-text: #166534;
+        --success-border: #4ade80;
+        --gap-negative: #ef4444;
+        --gap-positive: #22c55e;
+        --radius-card: 16px;
+        --radius-inner: 10px;
+        --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.06), 0 0 1px rgba(0, 0, 0, 0.04);
+        --shadow-card-hover: 0 8px 24px rgba(0, 0, 0, 0.10), 0 0 1px rgba(0, 0, 0, 0.04);
+        --font-sans: 'DM Sans', system-ui, sans-serif;
+        --font-mono: 'DM Mono', ui-monospace, monospace;
+      }
+
+      html {
+        font-size: 16px;
+        scroll-behavior: smooth;
+      }
+
+      body {
+        font-family: var(--font-sans);
+        background: var(--bg-page);
+        color: var(--text-primary);
+        min-height: 100vh;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .scorecard-page {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 48px 32px 80px;
+      }
+
+      .page-header {
+        margin-bottom: 40px;
+      }
+
+      .header-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 32px;
+      }
+
+      .header-left .eyebrow {
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        font-weight: 500;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--accent);
+        margin-bottom: 6px;
+      }
+
+      .header-left h1 {
+        font-size: clamp(1.75rem, 3vw, 2.5rem);
+        font-weight: 700;
+        line-height: 1.1;
+        letter-spacing: -0.025em;
+        color: var(--text-primary);
+      }
+
+      .header-badge {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 18px;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        box-shadow: var(--shadow-card);
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--text-secondary);
+        white-space: nowrap;
+      }
+
+      .header-badge .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--gap-negative);
+        flex-shrink: 0;
+      }
+
+      .divider {
+        height: 1px;
+        background: var(--border);
+        margin-bottom: 28px;
+      }
+
+      .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 14px;
+        margin-bottom: 32px;
+      }
+
+      .metric-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-card);
+        padding: 22px 20px 20px;
+        box-shadow: var(--shadow-card);
+        transition: box-shadow 0.2s ease, transform 0.2s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .metric-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        border-radius: var(--radius-card) var(--radius-card) 0 0;
+      }
+
+      .metric-card.needs-attention::before {
+        background: var(--warning-border);
+      }
+
+      .metric-card.on-track::before {
+        background: var(--success-border);
+      }
+
+      .metric-card:hover {
+        box-shadow: var(--shadow-card-hover);
+        transform: translateY(-2px);
+      }
+
+      .card-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+
+      .card-title {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        letter-spacing: 0.01em;
+        line-height: 1.3;
+        flex: 1;
+      }
+
+      .status-badge {
+        font-family: var(--font-mono);
+        font-size: 0.64rem;
+        font-weight: 500;
+        letter-spacing: 0.04em;
+        padding: 4px 8px;
+        border-radius: 6px;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+
+      .status-badge.needs-attention {
+        background: var(--warning-bg);
+        color: var(--warning-text);
+        border: 1px solid var(--warning-border);
+      }
+
+      .status-badge.on-track {
+        background: var(--success-bg);
+        color: var(--success-text);
+        border: 1px solid var(--success-border);
+      }
+
+      .metric-value {
+        font-size: 1.85rem;
+        font-weight: 700;
+        letter-spacing: -0.035em;
+        line-height: 1;
+        color: var(--text-primary);
+        margin-bottom: 16px;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .metric-progress {
+        margin-bottom: 14px;
+      }
+
+      .progress-track {
+        height: 6px;
+        background: var(--border);
+        border-radius: 999px;
+        overflow: hidden;
+        margin-bottom: 6px;
+      }
+
+      .progress-fill {
+        height: 100%;
+        border-radius: 999px;
+        transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+
+      .progress-fill.needs-attention {
+        background: linear-gradient(90deg, var(--warning-border), #f59e0b);
+      }
+
+      .progress-fill.on-track {
+        background: linear-gradient(90deg, #4ade80, #22c55e);
+      }
+
+      .progress-labels {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .progress-labels span {
+        font-family: var(--font-mono);
+        font-size: 0.68rem;
+        color: var(--text-muted);
+      }
+
+      .metric-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .meta-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.78rem;
+      }
+
+      .meta-label {
+        color: var(--text-muted);
+        font-weight: 400;
+      }
+
+      .meta-value {
+        font-weight: 600;
+        font-family: var(--font-mono);
+        font-size: 0.76rem;
+        color: var(--text-secondary);
+      }
+
+      .meta-value.gap-neg {
+        color: var(--gap-negative);
+      }
+
+      .meta-value.gap-pos {
+        color: var(--gap-positive);
+      }
+
+      .recommendation-section {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 16px;
+        align-items: start;
+      }
+
+      .recommendation-panel {
+        background: var(--accent);
+        border-radius: var(--radius-card);
+        padding: 28px 32px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .recommendation-panel::after {
+        content: '';
+        position: absolute;
+        top: -30px;
+        right: -30px;
+        width: 160px;
+        height: 160px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.04);
+        pointer-events: none;
+      }
+
+      .recommendation-label {
+        font-family: var(--font-mono);
+        font-size: 0.68rem;
+        font-weight: 500;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.45);
+        margin-bottom: 10px;
+      }
+
+      .recommendation-text {
+        font-size: 1rem;
+        line-height: 1.65;
+        color: #f4f4f5;
+        max-width: 65ch;
+      }
+
+      .recommendation-text strong {
+        color: #fde047;
+        font-weight: 600;
+      }
+
+      .priority-panel {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-card);
+        padding: 22px 20px;
+        box-shadow: var(--shadow-card);
+        min-width: 220px;
+      }
+
+      .priority-title {
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        margin-bottom: 16px;
+      }
+
+      .priority-list {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .priority-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.82rem;
+        font-weight: 500;
+        color: var(--text-primary);
+      }
+
+      .priority-num {
+        width: 22px;
+        height: 22px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--font-mono);
+        font-size: 0.68rem;
+        font-weight: 600;
+        flex-shrink: 0;
+      }
+
+      .priority-num.p1 {
+        background: #fef9c3;
+        color: #854d0e;
+        border: 1px solid #fde047;
+      }
+
+      .priority-num.p2 {
+        background: #f0fdf4;
+        color: #166534;
+        border: 1px solid #bbf7d0;
+      }
+
+      .priority-num.p3 {
+        background: #eff6ff;
+        color: #1e40af;
+        border: 1px solid #bfdbfe;
+      }
+
+      @media (max-width: 1024px) {
+        .metrics-grid {
+          grid-template-columns: repeat(3, 1fr);
+        }
+      }
+
+      @media (max-width: 768px) {
+        .scorecard-page {
+          padding: 28px 16px 56px;
+        }
+
+        .header-top {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .metrics-grid {
+          grid-template-columns: repeat(2, 1fr);
+          gap: 12px;
+        }
+
+        .recommendation-section {
+          grid-template-columns: 1fr;
+        }
+
+        .priority-panel {
+          display: none;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .metrics-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .metric-value {
+          font-size: 1.6rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="scorecard-page">
+      <header class="page-header">
+        <div class="header-top">
+          <div class="header-left">
+            <p class="eyebrow">Week ending May 17, 2026</p>
+            <h1>Contractor Scorecard</h1>
+          </div>
+          <div class="header-badge">
+            <span class="dot"></span>
+            <span id="summary"></span>
+          </div>
+        </div>
+        <div class="divider"></div>
+      </header>
+
+      <section id="metrics" class="metrics-grid" aria-label="Weekly performance metrics"></section>
+
+      <div class="recommendation-section">
+        <section class="recommendation-panel" aria-labelledby="recommendation-heading">
+          <p class="recommendation-label" id="recommendation-heading">Recommended Actions</p>
+          <p id="recommendation-text" class="recommendation-text"></p>
+        </section>
+
+        <aside class="priority-panel" aria-label="Priority order">
+          <p class="priority-title">Focus Order</p>
+          <ol class="priority-list">
+            <li class="priority-item">
+              <span class="priority-num p1">1</span>
+              Gross Profit
+            </li>
+            <li class="priority-item">
+              <span class="priority-num p2">2</span>
+              Revenue
+            </li>
+            <li class="priority-item">
+              <span class="priority-num p3">3</span>
+              Jobs Sold
+            </li>
+          </ol>
+        </aside>
+      </div>
+    </main>
+
+    <script>
+      const metrics = [
+        { key: 'revenue', label: 'Revenue', kind: 'currency', actual: 42000, target: 50000 },
+        { key: 'gross-profit', label: 'Gross Profit', kind: 'percent', actual: 28, target: 35 },
+        { key: 'cash-balance', label: 'Cash Balance', kind: 'currency', actual: 18500, target: 25000 },
+        { key: 'leads', label: 'Leads', kind: 'count', actual: 14, target: 20 },
+        { key: 'jobs-sold', label: 'Jobs Sold', kind: 'count', actual: 3, target: 5 },
+      ];
+
+      const recommendationPriority = ['gross-profit', 'revenue', 'jobs-sold', 'leads', 'cash-balance'];
+
+      function formatValue(kind, value) {
+        if (kind === 'currency') {
+          return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+            maximumFractionDigits: 0,
+          }).format(value);
+        }
+        if (kind === 'percent') {
+          return `${value}%`;
+        }
+        return new Intl.NumberFormat('en-US').format(value);
+      }
+
+      function formatGap(kind, value) {
+        if (kind === 'currency') {
+          return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+            maximumFractionDigits: 0,
+          }).format(value);
+        }
+        if (kind === 'percent') {
+          return `${value}%`;
+        }
+        return new Intl.NumberFormat('en-US').format(value);
+      }
+
+      function calculateMetricStatus(metric) {
+        const difference = metric.actual - metric.target;
+        const percentOfTarget = Math.min((metric.actual / metric.target) * 100, 100);
+        return {
+          ...metric,
+          status: difference >= 0 ? 'On Track' : 'Needs Attention',
+          difference,
+          percentOfTarget,
+          actualLabel: formatValue(metric.kind, metric.actual),
+          targetLabel: formatValue(metric.kind, metric.target),
+          gapLabel:
+            difference >= 0
+              ? `+${formatGap(metric.kind, difference)}`
+              : `-${formatGap(metric.kind, Math.abs(difference))}`,
+        };
+      }
+
+      function buildSummary(results) {
+        const onTrackCount = results.filter((r) => r.status === 'On Track').length;
+        const needsAttentionCount = results.length - onTrackCount;
+        return `${needsAttentionCount} of ${results.length} metrics need attention`;
+      }
+
+      function buildRecommendation(results) {
+        const weakMetrics = [...results]
+          .filter((r) => r.status === 'Needs Attention')
+          .sort((a, b) => recommendationPriority.indexOf(a.key) - recommendationPriority.indexOf(b.key));
+
+        if (weakMetrics.length === 0) {
+          return 'All five metrics are on track. Keep the weekly cadence and protect margins as new work comes in.';
+        }
+
+        const top = weakMetrics[0];
+
+        if (top.key === 'gross-profit') {
+          return `<strong>Gross profit is below target by ${Math.abs(top.difference)}%.</strong> Review labor hours, material costs, and estimate accuracy before taking on more work. Revenue and jobs sold are also behind target — tighten lead follow-up and review close rates this week.`;
+        }
+
+        const gapText = top.gapLabel.replace('-', '');
+        return `<strong>${top.label} is below target by ${gapText}.</strong> Focus the next review on closing this gap before expanding workload or taking on new commitments.`;
+      }
+
+      function renderMetricCard(result) {
+        const cardClass = result.status === 'On Track' ? 'metric-card on-track' : 'metric-card needs-attention';
+        const badgeClass = result.status === 'On Track' ? 'status-badge on-track' : 'status-badge needs-attention';
+        const fillClass = result.status === 'On Track' ? 'progress-fill on-track' : 'progress-fill needs-attention';
+        const gapClass = result.difference >= 0 ? 'meta-value gap-pos' : 'meta-value gap-neg';
+
+        return `
+          <article class="${cardClass}">
+            <div class="card-header">
+              <h2 class="card-title">${result.label}</h2>
+              <span class="${badgeClass}">${result.status}</span>
+            </div>
+            <p class="metric-value">${result.actualLabel}</p>
+            <div class="metric-progress">
+              <div class="progress-track">
+                <div class="${fillClass}" style="width: ${result.percentOfTarget}%"></div>
+              </div>
+              <div class="progress-labels">
+                <span>${Math.round(result.percentOfTarget)}% of target</span>
+                <span>Target: ${result.targetLabel}</span>
+              </div>
+            </div>
+            <div class="metric-meta">
+              <div class="meta-row">
+                <span class="meta-label">Target</span>
+                <span class="meta-value">${result.targetLabel}</span>
+              </div>
+              <div class="meta-row">
+                <span class="meta-label">Gap</span>
+                <span class="${gapClass}">${result.gapLabel}</span>
+              </div>
+            </div>
+          </article>
+        `;
+      }
+
+      function renderScorecard() {
+        const results = metrics.map(calculateMetricStatus);
+        document.getElementById('summary').textContent = buildSummary(results);
+        document.getElementById('metrics').innerHTML = results.map(renderMetricCard).join('');
+        document.getElementById('recommendation-text').innerHTML = buildRecommendation(results);
+      }
+
+      window.scorecard = {
+        metrics,
+        calculateMetricStatus,
+        buildSummary,
+        buildRecommendation,
+        renderMetricCard,
+        renderScorecard,
+      };
+
+      if (typeof document !== 'undefined') {
+        renderScorecard();
+      }
+    </script>
+  </body>
+</html>
